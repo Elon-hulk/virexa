@@ -1,0 +1,41 @@
+services:
+  # ── Dashboard (Web Service) ──────────────────────────────────────────────────
+  - type: web
+    name: virexa-dashboard
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn dashboard.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DISCORD_TOKEN
+        sync: false          # set manually in Render dashboard
+      - key: DISCORD_CLIENT_ID
+        sync: false
+      - key: DISCORD_CLIENT_SECRET
+        sync: false
+      - key: DISCORD_REDIRECT_URI
+        # !! Update this to your actual Render URL after first deploy
+        value: https://virexa-dashboard.onrender.com/auth/callback
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./virexa.db
+      - key: SECRET_KEY
+        generateValue: true  # Render auto-generates a secure value
+      - key: DEFAULT_PREFIX
+        value: "/"
+    disk:
+      name: virexa-data
+      mountPath: /opt/render/project/src
+      sizeGB: 1              # keeps virexa.db across restarts ($0.25/GB/month)
+
+  # ── Discord Bot (Background Worker) ─────────────────────────────────────────
+  - type: worker
+    name: virexa-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m bot.main
+    envVars:
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./virexa.db
+      - key: DEFAULT_PREFIX
+        value: "/"
