@@ -7,6 +7,11 @@ from database.models import User, Session
 import httpx
 import uuid
 from config.settings import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI
+
+# Discord requires a proper User-Agent — without it Cloudflare blocks requests
+DISCORD_HEADERS = {
+    "User-Agent": "Virexa/1.0 (https://github.com/virexa; Python/httpx)",
+}
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
@@ -39,7 +44,7 @@ async def fetch_admin_guilds(access_token: str) -> list[dict]:
     async with httpx.AsyncClient() as client:
         r = await client.get(
             "https://discord.com/api/users/@me/guilds",
-            headers={"Authorization": f"Bearer {access_token}"},
+            headers={**DISCORD_HEADERS, "Authorization": f"Bearer {access_token}"},
             timeout=10,
         )
     if r.status_code == 200:
@@ -104,7 +109,10 @@ async def auth_callback(
                 "code": code,
                 "redirect_uri": DISCORD_REDIRECT_URI,
             },
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            headers={
+                **DISCORD_HEADERS,
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
             timeout=10,
         )
     if token_r.status_code != 200:
@@ -118,7 +126,7 @@ async def auth_callback(
     async with httpx.AsyncClient() as client:
         user_r = await client.get(
             "https://discord.com/api/users/@me",
-            headers={"Authorization": f"Bearer {access_token}"},
+            headers={**DISCORD_HEADERS, "Authorization": f"Bearer {access_token}"},
             timeout=10,
         )
     if user_r.status_code != 200:
