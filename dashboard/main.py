@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -26,6 +26,11 @@ app.include_router(settings.router)
 @app.on_event("startup")
 async def startup_event():
     await init_db()
+
+# ── Health check (for UptimeRobot / ping monitors) ────────────────────────────
+@app.api_route("/ping", methods=["GET", "HEAD"])
+async def ping():
+    return JSONResponse({"status": "ok"})
 
 # ── Main dashboard (always renders, login handled client-side) ─────────────────
 @app.get("/", response_class=HTMLResponse)
