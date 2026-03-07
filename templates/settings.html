@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Virexa Dashboard{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2.5rem;">
+    <h1 class="page-title" style="margin-bottom: 0.5rem; font-weight: 800; letter-spacing: -0.025em;">Configuration</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem;">Customize how Virexa behaves in your server. Changes are applied instantly.</p>
+</div>
+
+<div class="settings-grid" style="display: grid; grid-template-columns: 1fr 350px; gap: 2rem; align-items: start;">
+    <div class="card" style="padding: 2.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+        <form method="POST" action="/settings">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label for="guild_id" style="font-weight: 600; margin-bottom: 0.6rem;">Server / Guild ID</label>
+                    <input type="text" id="guild_id" name="guild_id" required placeholder="123456789012345678"
+                        value="{{ guild_id if guild_id else '' }}" style="background: var(--hover-bg); border-color: var(--border-color); font-family: monospace;">
+                </div>
+
+                <div class="form-group">
+                    <label for="prefix" style="font-weight: 600; margin-bottom: 0.6rem;">Command Prefix</label>
+                    <input type="text" id="prefix" name="prefix" value="/" required style="background: var(--hover-bg); border-color: var(--border-color); font-weight: 700; font-size: 1.1rem;">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label for="log_channel_id" style="font-weight: 600; margin-bottom: 0.6rem;">Log Channel ID</label>
+                <input type="text" id="log_channel_id" name="log_channel_id" placeholder="123456789012345678" style="background: var(--hover-bg); border-color: var(--border-color); font-family: monospace;">
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">The channel where Virexa will post moderation logs.</p>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2.5rem;">
+                <label style="font-weight: 600; margin-bottom: 1rem; display: block; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Events to Monitor</label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem;">
+                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: var(--radius-sm); transition: var(--transition); border: 1px solid transparent;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" name="events" value="member_join" style="width: 18px; height: 18px; accent-color: var(--accent-primary);"> 
+                        <span style="font-size: 0.9rem;">Member Join</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: var(--radius-sm); transition: var(--transition); border: 1px solid transparent;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" name="events" value="member_remove" style="width: 18px; height: 18px; accent-color: var(--accent-primary);"> 
+                        <span style="font-size: 0.9rem;">Member Leave</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: var(--radius-sm); transition: var(--transition); border: 1px solid transparent;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" name="events" value="bot_add" style="width: 18px; height: 18px; accent-color: var(--accent-primary);"> 
+                        <span style="font-size: 0.9rem;">Bot Add</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: var(--radius-sm); transition: var(--transition); border: 1px solid transparent;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" name="events" value="member_update_name" style="width: 18px; height: 18px; accent-color: var(--accent-primary);"> 
+                        <span style="font-size: 0.9rem;">Username Change</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: var(--radius-sm); transition: var(--transition); border: 1px solid transparent;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" name="events" value="member_update_nick" style="width: 18px; height: 18px; accent-color: var(--accent-primary);"> 
+                        <span style="font-size: 0.9rem;">Nickname Change</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: var(--radius-sm); transition: var(--transition); border: 1px solid transparent;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" name="events" value="role_add" style="width: 18px; height: 18px; accent-color: var(--accent-primary);"> 
+                        <span style="font-size: 0.9rem;">Role Add</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: var(--radius-sm); transition: var(--transition); border: 1px solid transparent;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" name="events" value="role_remove" style="width: 18px; height: 18px; accent-color: var(--accent-primary);"> 
+                        <span style="font-size: 0.9rem;">Role Remove</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: var(--radius-sm); transition: var(--transition); border: 1px solid transparent;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" name="events" value="channel_create" style="width: 18px; height: 18px; accent-color: var(--accent-primary);"> 
+                        <span style="font-size: 0.9rem;">Channel Create</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: var(--radius-sm); transition: var(--transition); border: 1px solid transparent;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" name="events" value="channel_delete" style="width: 18px; height: 18px; accent-color: var(--accent-primary);"> 
+                        <span style="font-size: 0.9rem;">Channel Delete</span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem; border-radius: var(--radius-md); box-shadow: 0 4px 12px rgba(0, 83, 156, 0.2); display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                <span>Save Configuration</span>
+            </button>
+        </form>
+    </div>
+
+    <div class="sidebar-info" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="card" style="padding: 1.5rem; border-radius: var(--radius-lg); background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: #fff; border: none;">
+            <h4 style="margin-bottom: 0.75rem; font-size: 1.1rem;">Need Help?</h4>
+            <p style="font-size: 0.9rem; opacity: 0.9; line-height: 1.5; margin-bottom: 1.25rem;">Check our documentation for detailed guides on how to configure each event type and permission.</p>
+            <a href="/docs" style="display: block; text-align: center; padding: 0.75rem; background: rgba(255,255,255,0.2); color: #fff; text-decoration: none; border-radius: var(--radius-md); font-weight: 600; transition: var(--transition);" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">Read Docs</a>
+        </div>
+
+        <div class="card" style="padding: 1.5rem; border-radius: var(--radius-lg); border-color: var(--border-color);">
+            <h4 style="margin-bottom: 0.75rem; font-size: 1.1rem; opacity: 1; text-transform: none; letter-spacing: normal;">Developer Mode</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 1rem;">To get Guild or Channel IDs, enable <strong>Developer Mode</strong> in your Discord settings (User Settings > Advanced).</p>
+            <div style="background: var(--hover-bg); padding: 0.75rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 0.8rem; border: 1px solid var(--border-color);">
+                Right-click > Copy ID
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

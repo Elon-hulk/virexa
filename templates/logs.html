@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Live Logs - Virexa Dashboard{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+    <div>
+        <h1 class="page-title" style="margin-bottom: 0.5rem; font-weight: 800; letter-spacing: -0.025em;">Live Logs</h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">Real-time stream of all events captured by Virexa across your managed servers.</p>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem; background: var(--hover-bg); padding: 0.5rem 1rem; border-radius: 2rem; border: 1px solid var(--border-color); font-size: 0.875rem; font-weight: 600;">
+        <span style="width: 8px; height: 8px; background: #10B981; border-radius: 50%; display: inline-block; animation: pulse 2s infinite;"></span>
+        <span>Live Connection</span>
+    </div>
+</div>
+
+<style>
+@keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+</style>
+
+<div class="table-container" style="box-shadow: var(--shadow-md); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-color);">
+<table>
+    <thead>
+        <tr>
+            <th>Event Type</th>
+            <th>Description</th>
+            <th>Server ID</th>
+            <th>Time</th>
+        </tr>
+    </thead>
+    <tbody id="logs-body">
+        {% for log in recent_logs %}
+        <tr style="transition: var(--transition);">
+            <td><span class="badge badge-yellow">{{ log.event_type }}</span></td>
+            <td>{{ log.description }}</td>
+            <td><span class="badge badge-red" style="font-family: monospace;">{{ log.guild_id }}</span></td>
+            <td style="color: var(--text-muted); font-size: 0.85rem;">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

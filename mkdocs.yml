@@ -1,0 +1,75 @@
+site_name: Virexa Documentation
+site_description: Professional Discord Moderation & Management
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tooltips
+
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Introduction: getting-started/introduction.md
+    - Setup: getting-started/setup.md
+    - Permissions: getting-started/permissions.md
+  - Core Features:
+    - Overview: core-features/overview.md
+    - Moderation: core-features/moderation.md
+    - Backup System: core-features/backup.md
+    - Logging: core-features/logging.md
+    - Purge: core-features/purge.md
+    - Role System: core-features/roles.md
+    - Boards: core-features/boards.md
+    - AFK System: core-features/afk.md
+    - Counters: core-features/counters.md
+    - Reminder System: core-features/reminders.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - def_list
+  - tables
+  - footnotes
+
+
+
+git config --global user.email "elonhacker044@gmail.com"
+git config --global user.name "elonhacker044-tech"

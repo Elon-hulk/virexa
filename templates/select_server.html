@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Select Server - Virexa Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .guild-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2.5rem;
+    }
+
+    .guild-card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .guild-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .guild-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--accent-primary);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .guild-card:hover::before {
+        opacity: 1;
+    }
+
+    .guild-icon {
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--border-color);
+        transition: var(--transition);
+    }
+
+    .guild-card:hover .guild-icon {
+        border-color: var(--accent-primary);
+        transform: scale(1.05);
+    }
+
+    .guild-icon-placeholder {
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #fff;
+        border: 3px solid var(--border-color);
+    }
+
+    .guild-name {
+        font-size: 1.15rem;
+        font-weight: 700;
+        word-break: break-word;
+        color: var(--text-color);
+    }
+
+    .guild-manage-btn {
+        background: var(--hover-bg);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+        padding: 0.6rem 1.25rem;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: var(--transition);
+        margin-top: 0.5rem;
+    }
+
+    .guild-card:hover .guild-manage-btn {
+        background: var(--accent-primary);
+        color: #fff;
+        border-color: var(--accent-primary);
+        box-shadow: 0 4px 12px rgba(0, 83, 156, 0.3);
+    }
+
+    .empty-state {
+        margin-top: 6rem;
+        text-align: center;
+        padding: 4rem;
+        background: var(--hover-bg);
+        border-radius: var(--radius-lg);
+        border: 1px dashed var(--border-color);
+    }
+
+    .empty-state p {
+        margin-top: 0.5rem;
+    }
+</style>
+
+<h1 class="page-title" style="font-size: 2.5rem; margin-bottom: 0.5rem; font-weight: 800; letter-spacing: -0.025em;">Select a Server</h1>
+<p style="color: var(--text-muted); font-size: 1.1rem; max-width: 600px;">
+    Choose a Discord server to customize settings, view moderation logs, and manage roles with Virexa.
+</p>
+
+{% if guilds %}
+<div class="guild-grid">
+    {% for guild in guilds %}
+    <a class="guild-card" href="/settings_page?guild_id={{ guild.id }}">
+        {% if guild.icon %}
+        <img class="guild-icon" src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png"
+            alt="{{ guild.name }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="guild-icon-placeholder" style="display:none;">{{ guild.name[0]|upper }}</div>
+        {% else %}
+        <div class="guild-icon-placeholder">{{ guild.name[0]|upper }}</div>
+        {% endif %}
+        <div class="guild-name">{{ guild.name }}</div>
+        <span class="guild-manage-btn">Manage</span>
+    </a>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state">
+    <div style="font-size: 3rem;">🔍</div>
+    <h3>No manageable servers found</h3>
+    <p>Make sure you have <strong>Administrator</strong> permissions in at least one server.</p>
+    <p>If Virexa is not in your server yet,
+        <a href="https://discord.com/api/oauth2/authorize?client_id={{ discord_client_id }}&permissions=8&scope=bot%20applications.commands"
+            target="_blank" style="color: var(--accent-primary); font-weight: 700; text-decoration: none; border-bottom: 2px solid rgba(0, 83, 156, 0.2); transition: var(--transition);">
+            invite it here
+        </a>.
+    </p>
+    <a href="/logout" style="display:inline-block; margin-top:1.5rem; color: var(--accent-red);">
+        ← Logout and try again
+    </a>
+</div>
+{% endif %}
+{% endblock %}
