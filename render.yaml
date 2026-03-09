@@ -26,12 +26,12 @@ services:
       mountPath: /opt/render/project/src
       sizeGB: 1              # keeps virexa.db across restarts ($0.25/GB/month)
 
-  # ── Discord Bot (Background Worker) ─────────────────────────────────────────
-  - type: worker
+  # ── Discord Bot (Web Service with health check) ─────────────────────────────────────────
+  - type: web
     name: virexa-bot
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python -m bot.main
+    startCommand: python keep_alive.py
     envVars:
       - key: DISCORD_TOKEN
         sync: false
@@ -39,3 +39,5 @@ services:
         value: sqlite+aiosqlite:///./virexa.db
       - key: DEFAULT_PREFIX
         value: "/"
+      - key: PORT
+        value: 8080
