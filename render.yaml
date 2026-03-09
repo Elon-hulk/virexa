@@ -39,5 +39,3 @@ services:
         value: sqlite+aiosqlite:///./virexa.db
       - key: DEFAULT_PREFIX
         value: "/"
-      - key: PORT
-        value: 8080

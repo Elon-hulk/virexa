@@ -5,7 +5,8 @@ import uvicorn
 import asyncio
 import os
 import sys
-from threading import Thread
+import logging
+from uvicorn import Config, Server
 
 # Add the root directory to PYTHONPATH so imports work correctly
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -14,6 +15,10 @@ from config.settings import DISCORD_TOKEN
 from bot.events import setup_events
 from bot.commands import setup_commands
 from database.connection import init_db
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # 1. Setup FastAPI
 app = fastapi.FastAPI()
@@ -43,26 +48,33 @@ class VirexaBot(commands.Bot):
         await self.tree.sync()
 
     async def on_ready(self):
-        print(f"Logged in as {self.user} (ID: {self.user.id})")
-        print("Virexa bot is ready.")
+        logger.info(f"Logged in as {self.user} (ID: {self.user.id})")
+        logger.info("Virexa bot is ready.")
 
 bot = VirexaBot()
 
-# 3. Function to run FastAPI
-def run_fastapi():
-    # Use port 8080 or the one provided by your host (e.g., Render sets $PORT)
-    port = int(os.environ.get("PORT", 8080))
-    uvicorn.run(app, host="0.0.0.0", port=port)
-
-# 4. Main execution
-if __name__ == "__main__":
+# 3. Main async function
+async def main():
     if DISCORD_TOKEN == "your-discord-bot-token-here":
-        print("Please configure your DISCORD_TOKEN in the .env file.")
+        logger.error("Please configure your DISCORD_TOKEN in the .env file.")
         sys.exit(1)
     
-    # Start FastAPI in a separate thread
-    web_thread = Thread(target=run_fastapi, daemon=True)
-    web_thread.start()
+    # Use port from environment or default
+    port = int(os.environ.get("PORT", 8080))
+    logger.info(f"Starting FastAPI on port {port}")
     
-    # Start the Discord Bot
-    bot.run(DISCORD_TOKEN)
+    # Start FastAPI server in the same event loop
+    config = Config(app, host="0.0.0.0", port=port, loop="none")
+    server = Server(config)
+    asyncio.create_task(server.serve())
+    
+    logger.info("Starting Discord bot")
+    try:
+        await bot.start(DISCORD_TOKEN)
+    except Exception as e:
+        logger.error(f"Error starting bot: {e}")
+        raise
+
+# 4. Run the main function
+if __name__ == "__main__":
+    asyncio.run(main())
