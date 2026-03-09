@@ -116,6 +116,14 @@ async def auth_callback(
             timeout=10,
         )
     if token_r.status_code != 200:
+        # Discord sometimes returns 429 when the global rate limit is hit on a shared IP (e.g. Render).
+        # The body may include a code 0 message and the headers can provide Retry-After.
+        if token_r.status_code == 429:
+            retry = token_r.headers.get("Retry-After", "a few")
+            return _popup_error(
+                "Token exchange failed: global rate limit exceeded. "
+                f"Please wait {retry} seconds and try again."
+            )
         return _popup_error(f"Token exchange failed: {token_r.text}")
 
     token_data    = token_r.json()
@@ -130,6 +138,12 @@ async def auth_callback(
             timeout=10,
         )
     if user_r.status_code != 200:
+        if user_r.status_code == 429:
+            retry = user_r.headers.get("Retry-After", "a few")
+            return _popup_error(
+                "Failed to fetch Discord user info: global rate limit exceeded. "
+                f"Please wait {retry} seconds and try again."
+            )
         return _popup_error("Failed to fetch Discord user info.")
 
     info       = user_r.json()
