@@ -6,7 +6,10 @@ from database.connection import get_db
 from database.models import User, Session
 import httpx
 import uuid
+import logging
 from config.settings import DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI
+
+log = logging.getLogger(__name__)
 
 # Discord requires a proper User-Agent — without it Cloudflare blocks requests
 DISCORD_HEADERS = {
@@ -95,6 +98,7 @@ async def auth_callback(
 
     # 1. CSRF state check
     if state not in valid_states:
+        log.warning("OAuth callback with invalid/expired state %s", state)
         return _popup_error("Invalid or expired state. Please try again.")
     valid_states.discard(state)
 
@@ -120,10 +124,12 @@ async def auth_callback(
         # The body may include a code 0 message and the headers can provide Retry-After.
         if token_r.status_code == 429:
             retry = token_r.headers.get("Retry-After", "a few")
+            log.warning("Discord 429 on token exchange, retry after %s", retry)
             return _popup_error(
                 "Token exchange failed: global rate limit exceeded. "
                 f"Please wait {retry} seconds and try again."
             )
+        log.error("Token exchange error: %s", token_r.text)
         return _popup_error(f"Token exchange failed: {token_r.text}")
 
     token_data    = token_r.json()
@@ -140,10 +146,12 @@ async def auth_callback(
     if user_r.status_code != 200:
         if user_r.status_code == 429:
             retry = user_r.headers.get("Retry-After", "a few")
+            log.warning("Discord 429 when fetching user info, retry after %s", retry)
             return _popup_error(
                 "Failed to fetch Discord user info: global rate limit exceeded. "
                 f"Please wait {retry} seconds and try again."
             )
+        log.error("Failed to fetch Discord user info: %s", user_r.text)
         return _popup_error("Failed to fetch Discord user info.")
 
     info       = user_r.json()
