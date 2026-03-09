@@ -33,7 +33,8 @@ async def ping():
     return JSONResponse({"status": "ok"})
 
 # ── Main dashboard (always renders, login handled client-side) ─────────────────
-@app.get("/", response_class=HTMLResponse)
+# include HEAD so external monitors hitting "/" don't get 405s
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 async def root(request: Request, db: AsyncSession = Depends(get_db)):
     user = await get_current_user(request, db)
     # Always render the page; if no user, JS will show the login overlay
