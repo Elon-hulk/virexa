@@ -17,12 +17,11 @@ DISCORD_HEADERS = {
 }
 from sqlalchemy.ext.asyncio import AsyncSession
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
-# ── In-memory OAuth state store (short-lived, only for CSRF validation) ───────
-# Sessions are now in the DB; only the ephemeral state tokens live here.
-valid_states: set[str] = set()
+# ── OAuth state (now using cookies for serverless compatibility) ──────────────
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -64,7 +63,6 @@ async def discord_auth_url():
     State is stored in an in-memory set for CSRF validation only.
     """
     state = str(uuid.uuid4())
-    valid_states.add(state)
     url = (
         f"https://discord.com/api/oauth2/authorize"
         f"?client_id={DISCORD_CLIENT_ID}"
@@ -73,7 +71,9 @@ async def discord_auth_url():
         f"&scope=identify%20guilds"
         f"&state={state}"
     )
-    return JSONResponse({"url": url})
+    resp = JSONResponse({"url": url})
+    resp.set_cookie(key="oauth_state", value=state, httponly=True, max_age=300, samesite="lax")
+    return resp
 
 
 @router.get("/auth/callback")
@@ -96,11 +96,11 @@ async def auth_callback(
       7. Return HTML that postMessages to parent then closes
     """
 
-    # 1. CSRF state check
-    if state not in valid_states:
-        log.warning("OAuth callback with invalid/expired state %s", state)
-        return _popup_error("Invalid or expired state. Please try again.")
-    valid_states.discard(state)
+    # 1. CSRF state check (from cookie)
+    cookie_state = request.cookies.get("oauth_state")
+    if not cookie_state or state != cookie_state:
+        log.warning("OAuth callback with invalid state. State: %s, Cookie: %s", state, cookie_state)
+        return _popup_error("Invalid or expired session. Please try again.")
 
     # 2. Exchange code → access token
     async with httpx.AsyncClient() as client:
@@ -182,7 +182,11 @@ async def auth_callback(
         await db.delete(old)
     new_session = Session(session_id=session_id, discord_id=discord_id)
     db.add(new_session)
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as e:
+        log.error("Database commit failed: %s", e)
+        return _popup_error("Database write failed. Vercel's filesystem is read-only. Please switch to an external database like Supabase/Postgres.")
 
     # 6. Build avatar URL
     avatar_url = (
