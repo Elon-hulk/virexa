@@ -4,7 +4,20 @@ import os
 from config.settings import DATABASE_URL
 
 try:
-    engine = create_async_engine(DATABASE_URL, echo=False)
+    # Supabase "transaction pooler" (PgBouncer) does not support prepared statements.
+    # asyncpg uses prepared statements via a statement cache by default, so we disable it
+    # when we detect a pooler connection string.
+    connect_args = {}
+    url_lc = (DATABASE_URL or "").lower()
+    if "pooler.supabase.com" in url_lc or ":6543" in url_lc:
+        connect_args = {"statement_cache_size": 0}
+
+    engine = create_async_engine(
+        DATABASE_URL,
+        echo=False,
+        pool_pre_ping=True,
+        connect_args=connect_args,
+    )
 except Exception as e:
     print(f"FAILED TO CREATE ENGINE: {e}")
     # Fallback to local sqlite for safety, though it won't persist
