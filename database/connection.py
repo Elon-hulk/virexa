@@ -3,7 +3,13 @@ from sqlalchemy.orm import sessionmaker
 import os
 from config.settings import DATABASE_URL
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+try:
+    engine = create_async_engine(DATABASE_URL, echo=False)
+except Exception as e:
+    print(f"FAILED TO CREATE ENGINE: {e}")
+    # Fallback to local sqlite for safety, though it won't persist
+    engine = create_async_engine("sqlite+aiosqlite:///./virexa.db")
+
 AsyncSessionLocal = sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False
 )

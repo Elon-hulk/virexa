@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -17,7 +18,7 @@ DISCORD_HEADERS = {
 }
 from sqlalchemy.ext.asyncio import AsyncSession
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 router = APIRouter()
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 

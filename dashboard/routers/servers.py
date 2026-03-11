@@ -8,8 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 from config.settings import DISCORD_CLIENT_ID
 
+import os
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 @router.get("/servers")
 async def list_servers(request: Request, db: AsyncSession = Depends(get_db)):
