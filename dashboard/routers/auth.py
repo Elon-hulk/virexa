@@ -133,7 +133,13 @@ async def auth_callback(
         log.error("Token exchange error: %s", token_r.text)
         return _popup_error(f"Token exchange failed: {token_r.text}")
 
-    token_data    = token_r.json()
+    # Safely parse token response (avoid crashing on unexpected HTML/text)
+    try:
+        token_data = token_r.json()
+    except Exception as e:
+        log.error("Failed to parse Discord token response: %s", token_r.text)
+        return _popup_error("Token exchange failed: invalid response from Discord.")
+
     access_token  = token_data.get("access_token")
     refresh_token = token_data.get("refresh_token", "")
 
@@ -155,7 +161,11 @@ async def auth_callback(
         log.error("Failed to fetch Discord user info: %s", user_r.text)
         return _popup_error("Failed to fetch Discord user info.")
 
-    info       = user_r.json()
+    try:
+        info = user_r.json()
+    except Exception as e:
+        log.error("Failed to parse Discord user response: %s", user_r.text)
+        return _popup_error("Failed to parse Discord user info from Discord.")
     discord_id = str(info["id"])
     username   = info.get("username", "Unknown")
     avatar     = info.get("avatar") or ""
