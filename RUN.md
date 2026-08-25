@@ -82,3 +82,6 @@ python -m bot.main
 # Run the Dashboard
 uvicorn dashboard.main:app --host 0.0.0.0 --port 8000
 ```
+----------------------------------------------------
+
+# Developed by [Yusuf Abdi](https://yusuf.somdvps.org)
